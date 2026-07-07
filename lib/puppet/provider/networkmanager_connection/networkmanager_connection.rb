@@ -154,6 +154,17 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
     PROPERTY_MAP.each do |key, nmcli_key|
       next unless resource.key?(key)
 
+      if key == :master
+        begin
+          uuid_output = nmcli('-g', 'uuid', 'connection', 'show', resource[:master]).to_s.strip
+          value = uuid_output.empty? ? resource[:master] : uuid_output
+        rescue Puppet::ExecutionFailure
+          value = resource[:master]
+        end
+        modifications += [nmcli_key, value]
+        next
+      end
+
       value = normalize_setting_value(resource[key])
       modifications += [nmcli_key, value]
     end
