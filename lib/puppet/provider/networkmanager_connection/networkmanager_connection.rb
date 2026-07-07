@@ -104,6 +104,9 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
   def create_connection(context, name, resource)
     args = ['connection', 'add', 'con-name', name, 'type', resource.fetch(:type)]
     args += ['ifname', resource[:device]] if resource[:device]
+
+    args += ['master', resource[:master]] if resource[:master]
+
     nmcli(*args)
     apply_connection_settings(context, name, resource)
   end
