@@ -56,7 +56,7 @@ Puppet::ResourceApi.register_type(
     },
 
     slave_type: {
-      type: 'Optional[Enum[bond, bridge, "ovs-port"]]',
+      type: 'Optional[Enum[bond, bridge, "ovs-port", "ovs-bridge"]]',
       desc: 'The type of the master/controller (e.g., bond, bridge, ovs-port).',
     },
 
