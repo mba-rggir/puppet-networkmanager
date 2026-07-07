@@ -105,8 +105,6 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
     args = ['connection', 'add', 'con-name', name, 'type', resource.fetch(:type)]
     args += ['ifname', resource[:device]] if resource[:device]
 
-    args += ['master', resource[:master]] if resource[:master]
-
     if resource[:master]
       # Attempt to retrieve the master's UUID if the user provided the profile name.
       begin
