@@ -106,11 +106,9 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
     args += ['ifname', resource[:device]] if resource[:device]
 
     if resource[:master]
-      # Attempt to retrieve the master's UUID if the user provided the profile name.
       begin
-        uuid_output = nmcli('-t', '-f', 'connection.uuid', 'connection', 'show', resource[:master]).to_s.strip
-        master_id = uuid_output.empty? ? resource[:master] : uuid_output.split(':').last      
-      # If nmcli returns a valid UUID, use it; otherwise, fall back to the original value
+        uuid_output = nmcli('-g', 'uuid', 'connection', 'show', resource[:master]).to_s.strip
+        master_id = uuid_output.empty? ? resource[:master] : uuid_output
       rescue Puppet::ExecutionFailure
         master_id = resource[:master]
       end
