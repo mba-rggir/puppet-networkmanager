@@ -107,6 +107,9 @@ RSpec.describe Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnect
                                                      ipv6_gateway: nil,
                                                      ipv6_routes: [],
                                                      general_state: 'connected',
+                                                     mtu: nil,
+                                                     master: nil,
+                                                     slave_type: nil,
                                                    },
                                                  ])
     end
@@ -134,6 +137,9 @@ RSpec.describe Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnect
                                                      ipv6_gateway: nil,
                                                      ipv6_routes: [],
                                                      general_state: 'unknown',
+                                                     mtu: nil,
+                                                     master: nil,
+                                                     slave_type: nil,
                                                    },
                                                  ])
     end
@@ -202,6 +208,26 @@ RSpec.describe Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnect
                    })
     end
 
+    it 'creates an OVS port connected to a master bridge' do
+      expect(context).to receive(:notice).with("Creating 'ovs-port0'")
+      expect(provider).to receive(:nmcli).with('connection', 'add', 'con-name', 'ovs-port0', 'type', 'ovs-port')
+      expect(provider).to receive(:nmcli).with('connection', 'modify', 'ovs-port0',
+                                               'connection.master', 'br-int',
+                                               'connection.slave-type', 'ovs-port')
+
+                                               provider.set(context, {
+                                                'ovs-port0' => {
+                                                  is: {},
+                                                  should: {
+                                                    name: 'ovs-port0',
+                                                    ensure: 'present',
+                                                    type: 'ovs-port',
+                                                    master: 'br-int',
+                                                    slave_type: 'ovs-port',
+                                                  },
+                                                },
+                                              })
+    end
     it 'creates a connection when Puppet represents absent as a symbol' do
       expect(context).to receive(:notice).with("Creating 'home'")
       expect(provider).to receive(:nmcli).with('connection', 'add', 'con-name', 'home', 'type', 'wifi')
@@ -216,6 +242,25 @@ RSpec.describe Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnect
                          name: 'home',
                          ensure: :present,
                          type: 'wifi',
+                       },
+                     },
+                   })
+    end
+
+    it 'applies specific MTU arguments for bond interfaces' do
+      expect(context).to receive(:notice).with("Updating 'bond0'")
+      expect(provider).to receive(:nmcli).with('connection', 'modify', 'bond0',
+                                               'connection.mtu', '9000',
+                                               'bond.mtu', '9000')
+
+      provider.set(context, {
+                     'bond0' => {
+                       is: { name: 'bond0', ensure: 'present' },
+                       should: {
+                         name: 'bond0',
+                         ensure: 'present',
+                         type: 'bond',
+                         mtu: 9000,
                        },
                      },
                    })

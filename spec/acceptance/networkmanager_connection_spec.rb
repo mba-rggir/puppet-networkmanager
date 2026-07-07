@@ -88,6 +88,39 @@ describe 'networkmanager_connection resource' do
     shell("nmcli connection delete '#{test_profile[:connection]}'", acceptable_exit_codes: [0, 10])
   end
 
+  context 'when creating an Open vSwitch bridge with custom MTU' do
+    let(:ovs_profile) do
+      {
+        connection: 'ovs-acceptance',
+        interface: 'br-ovs-test',
+      }
+    end
+
+    let(:ovs_manifest) do
+      <<~PUPPET
+        #{networkmanager_manifest}
+
+        networkmanager_connection { '#{ovs_profile[:connection]}':
+          ensure      => present,
+          type        => 'ovs-bridge',
+          device      => '#{ovs_profile[:interface]}',
+          mtu         => 9000,
+          ipv4_method => 'disabled',
+          ipv6_method => 'disabled',
+          require     => Service['NetworkManager'],
+        }
+      PUPPET
+    end
+
+    before do
+      shell("nmcli connection delete '#{ovs_profile[:connection]}'", acceptable_exit_codes: [0, 10])
+    end
+
+    after do
+      shell("nmcli connection delete '#{ovs_profile[:connection]}'", acceptable_exit_codes: [0, 10])
+    end
+  end
+
   context 'when creating a bridge profile' do
     it 'creates the requested profile idempotently' do
       expect(test_profile[:interface].length).to be <= 15

@@ -88,6 +88,9 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
       ipv6_dns: 'ipv6.dns',
       ipv6_gateway: 'ipv6.gateway',
       ipv6_routes: 'ipv6.routes',
+      mtu: 'connection.mtu',
+      master: 'connection.master',
+      slave_type: 'connection.slave-type',
     }.freeze
   end
 
@@ -141,6 +144,17 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
 
       value = normalize_setting_value(resource[key])
       modifications += [nmcli_key, value]
+    end
+    
+    if resource.key?(:mtu) && resource[:mtu]
+      case resource[:type].to_s
+      when 'bond'
+        modifications += ['bond.mtu', resource[:mtu].to_s]
+      when 'ethernet', '802-3-ethernet'
+        modifications += ['802-3-ethernet.mtu', resource[:mtu].to_s]
+      when 'wifi'
+        modifications += ['wifi.mtu', resource[:mtu].to_s]
+      end
     end
 
     return if modifications.empty?
@@ -415,6 +429,9 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
     # Convert the output into a hash of key-value pairs.
     # Empty values are converted to `nil`.
     data = data.map { |item| item.split(':', 2).map { |v| v.strip.empty? ? nil : v.strip } }.to_h
+    
+    raw_mtu = data['connection.mtu'] || data['802-3-ethernet.mtu'] || data['bond.mtu'] || data['wifi.mtu']
+    parsed_mtu = raw_mtu ? raw_mtu.to_i : nil
 
     # Return a structured hash representing the connection's properties.
     {
@@ -433,6 +450,9 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
       ipv6_gateway: data['ipv6.gateway'],
       ipv6_routes: parse_routes(data['ipv6.routes']),
       general_state: normalize_general_state(data['GENERAL.STATE']),
+      mtu: parsed_mtu,
+      master: data['connection.master'],
+      slave_type: data['connection.slave-type'],
     }
   rescue Puppet::ExecutionFailure => e
     context.err("Error fetching NetworkManager connection '#{connection}': #{e}") if context

@@ -31,6 +31,33 @@
 #   reapply => false,
 # }
 
+# Example: Open vSwitch (OVS) Trunk Architecture (Bridge -> Port -> Interface) with MTU 9000
+#
+# networkmanager_connection { 'ovs-br0':
+#   ensure      => 'present',
+#   type        => 'ovs-bridge',
+#   device      => 'ovs-br0',
+#   mtu         => 9000,
+#   ipv4_method => 'disabled',
+#   ipv6_method => 'disabled',
+# }
+# 
+# networkmanager_connection { 'ovs-port0':
+#   ensure     => 'present',
+#   type       => 'ovs-port',
+#   master     => 'ovs-br0',
+#   slave_type => 'ovs-port',
+# }
+# 
+# networkmanager_connection { 'enp0s10-ovs':
+#   ensure     => 'present',
+#   type       => 'ethernet',
+#   device     => 'enp0s10',
+#   master     => 'ovs-port0',
+#   slave_type => 'ovs-port',
+#   mtu        => 9000,
+# }
+
 # Configure the otherwise unused enp0s9 with a persistent ethernet profile.
 # The provider does not activate a newly created profile automatically. Run
 # `nmcli connection up enp0s9-test` after Puppet has created it.

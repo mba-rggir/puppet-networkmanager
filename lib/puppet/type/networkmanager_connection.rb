@@ -36,13 +36,28 @@ Puppet::ResourceApi.register_type(
     },
 
     type: {
-      type: 'Enum[ethernet, "802-3-ethernet", loopback, wifi, vpn, bridge, bond, vlan]',
-      desc: 'The type of the connection (e.g., ethernet, wifi, vpn).',
+      type: 'Enum[ethernet, "802-3-ethernet", loopback, wifi, vpn, bridge, bond, vlan, "ovs-bridge", "ovs-port", "ovs-interface"]',
+      desc: 'The type of the connection (e.g., ethernet, wifi, vpn, ovs-port).',
     },
 
     device: {
       type: 'Optional[String]',
       desc: 'The network interface this connection applies to (optional).',
+    },
+
+    mtu: {
+      type: 'Optional[Integer[576, 9000]]',
+      desc: 'The Maximum Transmission Unit (MTU) for the connection.',
+    },
+
+    master: {
+      type: 'Optional[String]',
+      desc: 'The name or UUID of the master/controller connection this interface belongs to.',
+    },
+
+    slave_type: {
+      type: 'Optional[Enum[bond, bridge, "ovs-port"]]',
+      desc: 'The type of the master/controller (e.g., bond, bridge, ovs-port).',
     },
 
     reapply: {
