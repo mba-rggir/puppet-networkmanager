@@ -68,7 +68,7 @@ Puppet::ResourceApi.register_type(
     },
 
     ipv4_method: {
-      type:    'Enum[auto, manual, disabled, ignore]',
+      type:    'Optional[Enum[auto, manual, disabled, ignore]]',
       desc:    'The IPv4 configuration method (e.g., auto, manual, disabled, ignore).',
       default: 'auto',
     },
@@ -94,7 +94,7 @@ Puppet::ResourceApi.register_type(
     },
 
     ipv6_method: {
-      type:    'Enum[auto, manual, disabled, ignore]',
+      type:    'Optional[Enum[auto, manual, disabled, ignore]]',
       desc:    'The IPv6 configuration method (e.g., auto, manual, disabled, ignore).',
       default: 'auto',
     },
