@@ -453,6 +453,7 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
     raw_mtu = data['connection.mtu'] || data['802-3-ethernet.mtu'] || data['bond.mtu'] || data['wifi.mtu']
     parsed_mtu = raw_mtu ? raw_mtu.to_i : nil
 
+    parsed_mtu = nil if parsed_mtu == 0
     # Return a structured hash representing the connection's properties.
     {
       ensure: 'present',
