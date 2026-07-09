@@ -76,6 +76,7 @@ Puppet::ResourceApi.register_type(
       type: 'Optional[Boolean]',
       desc: 'Whether to automatically activate (nmcli connection up) the profile upon creation.',
       default: false,
+      behavior: :parameter,
     },
 
     ipv4_method: {
