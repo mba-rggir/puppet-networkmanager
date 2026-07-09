@@ -91,6 +91,7 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
       mtu: 'connection.mtu',
       master: 'connection.master',
       slave_type: 'connection.slave-type',
+      ovs_port_tag: 'ovs-port.tag'
     }.freeze
   end
 
@@ -452,8 +453,11 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
     
     raw_mtu = data['connection.mtu'] || data['802-3-ethernet.mtu'] || data['bond.mtu'] || data['wifi.mtu']
     parsed_mtu = raw_mtu ? raw_mtu.to_i : nil
-
     parsed_mtu = nil if parsed_mtu == 0
+
+    raw_ovs_tag = data['ovs-port.tag']
+    parsed_ovs_tag = raw_ovs_tag ? raw_ovs_tag.to_i : nil
+
     # Return a structured hash representing the connection's properties.
     {
       ensure: 'present',
@@ -474,6 +478,7 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
       mtu: parsed_mtu,
       master: data['connection.master'],
       slave_type: data['connection.slave-type'],
+      ovs_port_tag: parsed_ovs_tag,
     }
   rescue Puppet::ExecutionFailure => e
     context.err("Error fetching NetworkManager connection '#{connection}': #{e}") if context

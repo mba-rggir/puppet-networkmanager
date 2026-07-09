@@ -60,6 +60,11 @@ Puppet::ResourceApi.register_type(
       desc: 'The type of the master/controller (e.g., bond, bridge, ovs-port).',
     },
 
+    ovs_port_tag: {
+      type: 'Optional[Integer[0, 4095]]',
+      desc: 'The VLAN tag for the OVS port (0-4095).',
+    },
+
     reapply: {
       type: 'Boolean',
       desc: 'Whether to run an immediate runtime reapply on the device after profile changes.',
