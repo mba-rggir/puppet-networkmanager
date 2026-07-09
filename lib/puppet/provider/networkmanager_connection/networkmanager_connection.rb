@@ -88,7 +88,6 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
       ipv6_dns: 'ipv6.dns',
       ipv6_gateway: 'ipv6.gateway',
       ipv6_routes: 'ipv6.routes',
-      mtu: 'connection.mtu',
       master: 'connection.master',
       slave_type: 'connection.slave-type',
       ovs_port_tag: 'ovs-port.tag'
@@ -171,7 +170,7 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
       case resource[:type].to_s
       when 'bond'
         modifications += ['bond.mtu', resource[:mtu].to_s]
-      when 'ethernet', '802-3-ethernet'
+      when 'ethernet', '802-3-ethernet', 'ovs-interface'
         modifications += ['802-3-ethernet.mtu', resource[:mtu].to_s]
       when 'wifi'
         modifications += ['wifi.mtu', resource[:mtu].to_s]
