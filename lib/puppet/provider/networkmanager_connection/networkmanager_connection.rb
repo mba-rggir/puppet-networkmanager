@@ -118,6 +118,15 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
 
     nmcli(*args)
     apply_connection_settings(context, name, resource)
+
+    if resource[:auto_up]
+      begin
+        context.notice("Activating NetworkManager connection '#{name}' post-creation (auto_up => true)")
+        nmcli('connection', 'up', name)
+      rescue Puppet::ExecutionFailure => e
+        context.debug("Non-fatal failure during initial activation of '#{name}': #{e.message}")
+      end
+    end
   end
 
   # Updates settings on an existing NetworkManager profile.
