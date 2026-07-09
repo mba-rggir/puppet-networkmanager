@@ -155,11 +155,11 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
       next unless resource.key?(key)
       
       # Check if this resource is configured as an OVS slave port
-      is_ovs_slave = (resource[:slave_type].to_s == 'ovs-port' || resource[:master]) && resource[:type].to_s != 'ovs-interface'      
+      is_ovs_slave = (resource[:slave_type].to_s == 'ovs-port' || resource[:master]) && resource[:type].to_s != 'ovs-interface'
 
-      # Skip IPv4 and IPv6 settings if the interface is an OVS slave to prevent nmcli from crashing
+      # Fail if IP settings are explicitly declared on an OVS slave connection
       if is_ovs_slave && (nmcli_key.start_with?('ipv4.') || nmcli_key.start_with?('ipv6.'))
-        next
+        raise Puppet::Error, "Connection '#{name}': OVS port and slave connections ('#{resource[:type]}') cannot have IP settings (#{key}). Declare them only on an 'ovs-interface'."
       end
 
       value = normalize_setting_value(resource[key])
