@@ -118,15 +118,8 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
 
     nmcli(*args)
     apply_connection_settings(context, name, resource)
-
-    if resource[:auto_up]
-      begin
-        context.notice("Activating NetworkManager connection '#{name}' post-creation (auto_up => true)")
-        nmcli('connection', 'up', name)
-      rescue Puppet::ExecutionFailure => e
-        context.debug("Non-fatal failure during initial activation of '#{name}': #{e.message}")
-      end
-    end
+    
+    maybe_auto_up(context, name, resource, 'post-creation')
   end
 
   # Updates settings on an existing NetworkManager profile.
@@ -138,6 +131,8 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
   #
   def update_connection(context, name, resource)
     apply_connection_settings(context, name, resource)
+
+    maybe_auto_up(context, name, resource, 'post-update')
   end
 
   # Deletes a persistent NetworkManager profile.
@@ -288,6 +283,25 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
     [network.to_s, network.prefix]
   rescue ArgumentError => e
     raise Puppet::Error, "Connection '#{name}' has invalid #{description} '#{value}': #{e.message}"
+  end
+
+  # Automatically activates a newly created or updated profile when requested.
+  #
+  # @param context [Puppet::ResourceApi::BaseContext] The context for debug logging.
+  # @param name [String] The connection profile name.
+  # @param resource [Hash] Desired resource values.
+  # @param stage [String] The execution stage identifier used for logging (e.g. 'post-creation').
+  # @return [void]
+  #
+  def maybe_auto_up(context, name, resource, stage)
+    return unless resource[:auto_up]
+
+    begin
+      context.notice("Activating NetworkManager connection '#{name}' #{stage} (auto_up => true)")
+      nmcli('connection', 'up', name)
+    rescue Puppet::ExecutionFailure => e
+      context.debug("Non-fatal failure during #{stage} activation of '#{name}': #{e.message}")
+    end
   end
 
   # Reapplies a modified profile to its runtime device when requested.
