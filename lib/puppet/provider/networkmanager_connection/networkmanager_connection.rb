@@ -105,6 +105,16 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
     args = ['connection', 'add', 'con-name', name, 'type', resource.fetch(:type)]
     args += ['ifname', resource[:device]] if resource[:device]
 
+    if resource[:master]
+      begin
+        uuid_output = nmcli('-g', 'uuid', 'connection', 'show', resource[:master]).to_s.strip
+        master_id = uuid_output.empty? ? resource[:master] : uuid_output
+      rescue Puppet::ExecutionFailure
+        master_id = resource[:master]
+      end
+      args += ['master', master_id]
+    end 
+
     nmcli(*args)
     apply_connection_settings(context, name, resource)
     
