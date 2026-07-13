@@ -33,12 +33,12 @@
 #   reapply => false,
 # }
 
-# Example: Open vSwitch (OVS) Trunk Architecture (Bridge -> Port -> Interface) with MTU 9000
+# Example: Open vSwitch (OVS) Trunk Architecture (Bridge -> Port -> Interface)
 #
-# networkmanager_connection { 'ovs-br0':
+# networkmanager_connection { 'ovs-bridge':
 #   ensure      => 'present',
 #   type        => 'ovs-bridge',
-#   device      => 'ovs-br0',
+#   device      => 'ovs-bridge',
 #   mtu         => 9000,
 #   ipv4_method => 'disabled',
 #   ipv6_method => 'disabled',
@@ -47,17 +47,21 @@
 # networkmanager_connection { 'ovs-port0':
 #   ensure     => 'present',
 #   type       => 'ovs-port',
-#   master     => 'ovs-br0',
-#   slave_type => 'ovs-port',
+#   master     => 'ovs-bridge',
 # }
 # 
 # networkmanager_connection { 'enp0s10-ovs':
-#   ensure     => 'present',
-#   type       => 'ethernet',
-#   device     => 'enp0s10',
-#   master     => 'ovs-port0',
-#   slave_type => 'ovs-port',
-#   mtu        => 9000,
+#   ensure         => 'present',
+#   type           => 'ethernet',
+#   device         => 'enp0s10',
+#   master         => 'ovs-port0',
+#   slave_type     => 'ovs-port',
+#   mtu            => 9000,
+#   ipv4_method    => 'manual'
+#   ipv4_addresses => ['192.168.56.10/24'],
+#   ipv4_gateway:  => '192.168.56.1'
+#   ipv6_method: 'disabled'
+#   auto_up: true
 # }
 
 # Configure the otherwise unused enp0s9 with a persistent ethernet profile.
