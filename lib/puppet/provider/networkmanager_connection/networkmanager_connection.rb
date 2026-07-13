@@ -463,7 +463,9 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
     # Empty values are converted to `nil`.
     data = data.map { |item| item.split(':', 2).map { |v| v.strip.empty? ? nil : v.strip } }.to_h
     
-    raw_mtu = data['connection.mtu'] || data['802-3-ethernet.mtu'] || data['bond.mtu'] || data['wifi.mtu']
+    # Extracts the MTU and OVS port tag from the raw NetworkManager data.
+    # It checks multiple fields based on the connection type.
+    raw_mtu = data['connection.mtu'] || data['802-3-ethernet.mtu'] || data['ethernet.mtu'] || data['bond.mtu'] || data['wifi.mtu']
     parsed_mtu = raw_mtu ? raw_mtu.to_i : nil
     parsed_mtu = nil if parsed_mtu == 0
 
@@ -488,9 +490,9 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
       ipv6_routes: parse_routes(data['ipv6.routes']),
       general_state: normalize_general_state(data['GENERAL.STATE']),
       mtu: parsed_mtu,
+      ovs_port_tag: parsed_ovs_tag,
       master: data['connection.master'],
       slave_type: data['connection.slave-type'],
-      ovs_port_tag: parsed_ovs_tag,
     }
   rescue Puppet::ExecutionFailure => e
     context.err("Error fetching NetworkManager connection '#{connection}': #{e}") if context

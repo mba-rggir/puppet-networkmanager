@@ -11,6 +11,7 @@
 #   ensure         => 'present',
 #   type           => 'bridge',
 #   device         => 'br-test',
+#   mtu            => 1500,
 #   ipv4_method    => 'manual',
 #   ipv4_addresses => ['192.168.56.10/24'],
 #   ipv4_routes    => [
@@ -22,6 +23,7 @@
 #   ],
 #   ipv6_method    => 'ignore',
 #   reapply        => true,
+#   auto_up        => true,
 # }
 
 # To test deletion, comment out the resource above and enable this one:

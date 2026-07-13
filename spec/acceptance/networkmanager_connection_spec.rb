@@ -121,6 +121,35 @@ describe 'networkmanager_connection resource' do
     end
   end
 
+  context 'when creating an OVS Port with VLAN Tag' do
+    let(:ovs_port_profile) do
+      {
+        connection: 'ovs-port-acceptance',
+      }
+    end
+
+    let(:ovs_port_manifest) do
+      <<~PUPPET
+        #{networkmanager_manifest}
+
+        networkmanager_connection { '#{ovs_port_profile[:connection]}':
+          ensure       => present,
+          type         => 'ovs-port',
+          ovs_port_tag => 1105,
+          require      => Service['NetworkManager'],
+        }
+      PUPPET
+    end
+
+    before do
+      shell("nmcli connection delete '#{ovs_port_profile[:connection]}'", acceptable_exit_codes: [0, 10])
+    end
+
+    after do
+      shell("nmcli connection delete '#{ovs_port_profile[:connection]}'", acceptable_exit_codes: [0, 10])
+    end
+  end
+
   context 'when creating a bridge profile' do
     it 'creates the requested profile idempotently' do
       expect(test_profile[:interface].length).to be <= 15

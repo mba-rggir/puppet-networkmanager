@@ -11,6 +11,7 @@ Puppet::ResourceApi.register_type(
         ensure         => 'present',
         type           => '802-3-ethernet',
         device         => 'enp0s8',
+        mtu            => 9000
         ipv4_method    => 'manual',
         ipv4_addresses => ['192.0.2.10/24'],
         ipv4_gateway   => '192.0.2.1',
@@ -19,7 +20,7 @@ Puppet::ResourceApi.register_type(
         reapply        => false,
       }
 
-    This type provides Puppet with the capabilities to manage NetworkManager connections.
+    This type provides Puppet  ith the capabilities to manage NetworkManager connections.
   EOS
   features: ['simple_get_filter'],
   attributes: {
