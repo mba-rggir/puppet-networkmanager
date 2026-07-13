@@ -105,17 +105,6 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
     args = ['connection', 'add', 'con-name', name, 'type', resource.fetch(:type)]
     args += ['ifname', resource[:device]] if resource[:device]
 
-    if resource[:master]
-      begin
-        uuid_output = nmcli('-g', 'uuid', 'connection', 'show', resource[:master]).to_s.strip
-        master_id = uuid_output.empty? ? resource[:master] : uuid_output
-      rescue Puppet::ExecutionFailure
-        master_id = resource[:master]
-      end
-
-      args += ['master', master_id]
-    end
-
     nmcli(*args)
     apply_connection_settings(context, name, resource)
     
@@ -161,15 +150,16 @@ class Puppet::Provider::NetworkmanagerConnection::NetworkmanagerConnection < Pup
       # Check if this resource is configured as an OVS slave port
       is_ovs_slave = (resource[:slave_type].to_s == 'ovs-port' || resource[:master]) && resource[:type].to_s != 'ovs-interface'
 
-      # Fail if IP settings are explicitly declared on an OVS slave connection
+      # Fail if IP settings are explicitly declared on an ovs-port connection
       if is_ovs_slave && (nmcli_key.start_with?('ipv4.') || nmcli_key.start_with?('ipv6.'))
-        raise Puppet::Error, "Connection '#{name}': OVS port and slave connections ('#{resource[:type]}') cannot have IP settings (#{key}). Declare them only on an 'ovs-interface'."
+        raise Puppet::Error, "Connection '#{name}': ovs-port and slave connections ('#{resource[:type]}') cannot have IP settings (#{key}). Declare them only on an 'ovs-interface'."
       end
 
       value = normalize_setting_value(resource[key])
       modifications += [nmcli_key, value]
     end
     
+    # Appends specific MTU settings based on the connection type.
     if resource.key?(:mtu) && resource[:mtu]
       case resource[:type].to_s
       when 'bond'
